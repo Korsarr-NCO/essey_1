@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Access Portal – НУОУ</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f6f9;
+    color:#1e293b;
+}
+.header{
+    background:#0f172a;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-weight:bold;
+}
+.secure{
+    color:#22c55e;
+    font-size:14px;
+}
+.timer{
+    text-align:center;
+    margin:10px;
+    color:#dc2626;
+    font-weight:bold;
+}
+.container{
+    width:90%;
+    max-width:400px;
+    margin:40px auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #cbd5e1;
+    border-radius:6px;
+    font-size:16px;
+}
+button{
+    width:100%;
+    padding:12px;
+    background:#0f172a;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{
+    background:#1e293b;
+}
+#incident{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    color:#00ff00;
+    padding:20px;
+    font-family:monospace;
+    overflow:auto;
+    white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+Secure Access Portal – НУОУ<br>
+<span class="secure">🔒 HTTPS Secure Connection</span>
+</div>
+
+<div class="timer">
+⏳ Сесія активна ще: <span id="countdown">03:00</span>
+</div>
+
+<div class="container" id="loginBox">
+<h3>Доступ до бази даних ЕСЕ навчального центру</h3>
+<p>Введіть email або номер телефону</p>
+
+<input type="text" id="login" placeholder="Email або номер телефону">
+<input type="password" id="password" placeholder="Пароль">
+
+<button onclick="simulate()">Підключитися</button>
+
+<p style="font-size:12px;opacity:0.6;text-align:center;margin-top:10px;">
+Внутрішня система авторизації ЗСУ
+</p>
+</div>
+
+<div id="incident"></div>
+
+<script>
+// Таймер
+let time = 600;
+setInterval(function(){
+    let minutes = Math.floor(time/60);
+    let seconds = time%60;
+    document.getElementById("countdown").innerText =
+        String(minutes).padStart(2,'0') + ":" + String(seconds).padStart(2,'0');
+    time--;
+},1000);
+
+// ОС
+function detectOS() {
+    let ua = navigator.userAgent;
+    if (ua.includes("Android")) return "Android";
+    if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
+    return "Невідомо";
+}
+
+// Фейковий IP
+function generateFakeIP() {
+    return "10." +
+        Math.floor(Math.random()*255) + "." +
+        Math.floor(Math.random()*255) + "." +
+        Math.floor(Math.random()*255);
+}
+
+// ПРОГРЕС
+function animateProgress() {
+    let percent = 0;
+    let bar = document.getElementById("progressBar");
+
+    let interval = setInterval(() => {
+        percent += Math.floor(Math.random() * 3) + 1;
+
+        if (percent > 100) percent = 100;
+
+        let hashes = "#".repeat(Math.floor(percent / 5));
+        let dots = ".".repeat(20 - hashes.length);
+
+        bar.innerText = `[${hashes}${dots}] ${percent}%`;
+
+        if (percent >= 100) {
+            clearInterval(interval);
+        }
+    }, 60);
+}
+
+function simulate(){
+    let login = document.getElementById("login").value;
+    let password = document.getElementById("password").value;
+
+    document.getElementById("loginBox").style.display="none";
+    document.querySelector(".container").style.display="none";
+    document.getElementById("incident").style.display="block";
+
+    let incident = document.getElementById("incident");
+
+    let fakeIP = generateFakeIP();
+    let os = detectOS();
+    let deviceInfo = navigator.userAgent;
+    let timeNow = new Date().toLocaleString();
+
+    let text = `
+Ініціалізація перехоплення...
+Аналіз мережевого сегмента...
+Встановлення зовнішнього з'єднання...
+
+----------------------------------------
+
+⚠ SECURITY INCIDENT DETECTED ⚠
+
+Введений логін: ${login}
+Перехоплений пароль: ${password}
+
+IP-адреса: ${fakeIP}
+Геолокація: Київ
+Операційна система: ${os}
+Ідентифікатор пристрою: ${deviceInfo}
+Час входу: ${timeNow}
+
+----------------------------------------
+
+DATA EXFILTRATION IN PROGRESS...
+
+✉ ➜ ➜ ➜ ➜ ➜ ➜ ➜
+✉ ➜ ➜ ➜ ➜ ➜ ➜ ➜
+✉ ➜ ➜ ➜ ➜ ➜ ➜ ➜
+
+Передача облікових даних за межі внутрішньої мережі.
+Можливий іноземний розвідувальний інтерес.
+
+----------------------------------------
+
+`;
+
+    let i = 0;
+    function typeWriter(){
+        if(i < text.length){
+            incident.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter,15);
+        } else {
+            // після тексту додаємо прогрес
+            incident.innerHTML += '<br><div id="progressBar">[....................] 0%</div><br>';
+            animateProgress();
+        }
+    }
+
+    // звук
+    let audio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg");
+    audio.play();
+
+    typeWriter();
+}
+</script>
+
+</body>
+</html>
